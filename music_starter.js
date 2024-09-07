@@ -34,14 +34,19 @@ function drawGradientBackground() {
   noStroke();
 }
 
-function updateGradientBrightness(bass) {
-  //gradient showing is based off of bass
-  if (bass > 70 && gradientGlowIntensity === 0) {
-    gradientGlowIntensity = 255;  //Turn on
+//get background colour
+function getBackgroundColorAtY(yPosition) {
+  let inter = map(yPosition, cHeight / 8, cHeight - cHeight / 40, 0, 1);
+  return lerpColor(color(64, 224, 208, gradientGlowIntensity), color(0, 0, 0, gradientGlowIntensity), inter);
+}
+
+function updateGradient(lightNum) {
+  if (lightNum > 70 && gradientGlowIntensity === 0) {
+    gradientGlowIntensity = 255;
   }
 
   if (gradientGlowIntensity > 0) {
-    gradientGlowIntensity -= 5;  //Fade to black
+    gradientGlowIntensity -= 5;
   }
 }
 
@@ -68,28 +73,21 @@ function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segmen
   }
 }
 
-function drawLightBox(numSpeakers, bass, lightBoxStates){
-
+function drawLightBox(numSpeakers, lightBoxStates){
   speakerWidth = (cWidth / 2) / numSpeakers;
 
   for (let i = 0; i < numSpeakers; i++) {
     fill(0);
     rect(speakerWidth + speakerWidth * i * 2, cHeight / 20, speakerWidth, cHeight / 10);
 
-    if (bass > 70 && lightBoxStates[i].frameCountdown === 0 && lightBoxStates[i].glowIntensity === 10) {
-      lightBoxStates[i].glowIntensity = 255;
-      lightBoxStates[i].frameCountdown = 10;
-    }
+    //get the background colour
+    bgColor = getBackgroundColorAtY(cHeight / 20);
+    
+    //blend to background colour
+    circleColor = lerpColor(bgColor, color(64, 224, 208), lightBoxStates[i].glowIntensity / 255);
 
-    if (lightBoxStates[i].frameCountdown > 0) {
-      lightBoxStates[i].frameCountdown--;
-    } else {
-      if (lightBoxStates[i].glowIntensity > 10) {
-        lightBoxStates[i].glowIntensity -= 5;
-      }
-    }
-
-    fill(64, 224, 208, lightBoxStates[i].glowIntensity);
+    //draw the circles with the correct colour
+    fill(circleColor);
 
     circle((speakerWidth + speakerWidth * i * 2) - speakerWidth / 4, cHeight / 20, speakerWidth / 3, cHeight / 10);
     circle((speakerWidth + speakerWidth * i * 2) + speakerWidth / 4, cHeight / 20, speakerWidth / 3, cHeight / 10);
@@ -136,12 +134,12 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX3, lineX4, true); //zigzags for right beams
   drawCrossBeams(40, 0, lineY5 + 2.5, cWidth, lineY5 + 2.5, lineY6 + 2.5, false); //zigzags for top beams
 
-  drawLightBox(lightBoxCount,bass,lightBoxStates); //lightboxes
+  drawLightBox(lightBoxCount,lightBoxStates); //lightboxes
 
   tint(0);
   image(crowd,0,cHeight/3,cWidth,cHeight); //crowd
 
-  updateGradientBrightness(bass); //update gradient based on bass
+  updateGradient(bass); //update gradient based on bass
 
   /*
   quad(
