@@ -94,6 +94,60 @@ function drawLightBox(numSpeakers, lightBoxStates){
   }
 }
 
+laserGlowIntensity = 0; //start with lazers off
+function updateLaserGlowIntensity(lightNum) {
+  if (lightNum> 70 && laserGlowIntensity === 0) {
+    laserGlowIntensity = 255; //turn on lazers
+  }
+  
+  //fade lazers out
+  if (laserGlowIntensity > 0) {
+    laserGlowIntensity -= 5;
+  }
+}
+
+laserRotationAngle = 10; //lazer rotating angle
+
+function drawLasers() {
+  push();
+  strokeWeight(1); //laser thickness
+  stroke(57, 255, 20, laserGlowIntensity); //green lazer that turns off and on based on drums
+  
+  //top left origin
+  translate(0, 0);
+  rotate(laserRotationAngle);
+  
+  line(0, 0, cWidth * 2, 0);
+  line(0, 0, cWidth * 2, cWidth * 2);
+  line(0, 0, 0, cWidth * 2);
+  line(0, 0, cWidth, -cWidth * 2);
+  line(0, 0, -cWidth * 2, 0);
+  line(0, 0, -cWidth * 2, -cWidth * 2);
+  line(0, 0, -cWidth * 2, -cWidth * 2);
+
+  pop();
+  
+  push();
+  strokeWeight(1); //laser thickness
+  stroke(57, 255, 20, laserGlowIntensity); //green lazer that turns off and on based on drums
+  
+  //top right origin
+  translate(cWidth, 0);
+  rotate(-laserRotationAngle);
+  
+  line(0, 0, cWidth * 2, 0);
+  line(0, 0, 0, cHeight * 2);
+  line(0, 0, cWidth * 2, cHeight * 2);
+  line(0, 0, -cWidth * 2, 0);
+  line(0, 0, 0, -cHeight * 2);
+  line(0, 0, -cWidth * 2, -cHeight * 2);
+  
+  pop();
+  
+  //lazer rotate speed
+  laserRotationAngle += 0.5;
+}
+
 // vocal, drum, bass, and other are volumes ranging from 0 to 100
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
@@ -105,12 +159,14 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   drawGradientBackground();
 
   fill(0);
-  rect(cWidth/2,cHeight - cHeight/16,cWidth,cHeight/8);
-
-  fill(0,0,255);
   rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
   rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight); //little screen left
   rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight); //little screen right
+
+  drawLasers();
+
+  fill(0);
+  rect(cWidth/2,cHeight - cHeight/16,cWidth,cHeight/8);
 
   stroke(0);
   strokeWeight(5);
@@ -140,6 +196,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   image(crowd,0,cHeight/3,cWidth,cHeight); //crowd
 
   updateGradient(bass); //update gradient based on bass
+  updateLaserGlowIntensity(drum); // update lasers based on drum
 
   /*
   quad(
