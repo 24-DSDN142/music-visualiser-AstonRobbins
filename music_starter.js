@@ -20,6 +20,31 @@ for (let i = 0; i < lightBoxCount; i++) {
   lightBoxStates.push({ glowIntensity: 10, frameCountdown: 0 });
 }
 
+gradientGlowIntensity = 0; //background lighting starting colour intenstity (if the lights start off or on)
+
+function drawGradientBackground() {
+  noStroke();
+  for (let y = 0; y < cHeight; y++) {
+    //make background a turqouise gradient
+    inter = map(y, cHeight/8, cHeight - cHeight/40, 0, 1);  //map the gradients positioning for colour
+    col = lerpColor(color(64, 224, 208, gradientGlowIntensity), color(0, 0, 0, gradientGlowIntensity), inter); //gradient based on map from turquoise to black
+    stroke(col);
+    line(0, y, cWidth, y);
+  }
+  noStroke();
+}
+
+function updateGradientBrightness(bass) {
+  //gradient showing is based off of bass
+  if (bass > 70 && gradientGlowIntensity === 0) {
+    gradientGlowIntensity = 255;  //Turn on
+  }
+
+  if (gradientGlowIntensity > 0) {
+    gradientGlowIntensity -= 5;  //Fade to black
+  }
+}
+
 function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segment2, isVertical = true) {
   strokeWeight(2);
   let segmentSize = beamLength / numZigZags; //segment size of one zigzag
@@ -74,49 +99,45 @@ function drawLightBox(numSpeakers, bass, lightBoxStates){
 // vocal, drum, bass, and other are volumes ranging from 0 to 100
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
-  background(20);
+  background(5);
   textFont('Verdana'); // please use CSS safe fonts
   rectMode(CENTER)
   textSize(24);
 
+  drawGradientBackground();
 
   fill(0,0,255);
   rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
-  rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight);
-  rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight);
+  rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight); //little screen left
+  rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight); //little screen right
 
   stroke(0);
   strokeWeight(5);
 
-  lineX1 = cWidth / 2 - bigScreenWidth / 2; // Position of the first vertical line
-  lineX2 = lineX1 - cWidth / 30; // Position of the second vertical line
-
-  // Draw the two vertical black lines
-  line(lineX1, cHeight/25, lineX1, cHeight);
-  line(lineX2, cHeight/25, lineX2, cHeight);
-
-  lineX3 = cWidth / 2 + bigScreenWidth / 2; // Position of the first vertical line
-  lineX4 = lineX3 + cWidth / 30; // Position of the second vertical line
-
-  // Draw the two vertical black lines
-  line(lineX3, cHeight/25, lineX3, cHeight);
-  line(lineX4, cHeight/25, lineX4, cHeight);
-
+  //cross beam lines
+  lineX1 = cWidth / 2 - bigScreenWidth / 2;
+  lineX2 = lineX1 - cWidth / 30;
+  lineX3 = cWidth / 2 + bigScreenWidth / 2;
+  lineX4 = lineX3 + cWidth / 30;
   lineY5 = 0;
   lineY6 = cHeight/30;
 
-  line(0,lineY5 + 2.5,cWidth,lineY5 + 2.5); //2.5 is for the stroke weight of 5
+  line(lineX1, cHeight/25, lineX1, cHeight);
+  line(lineX2, cHeight/25, lineX2, cHeight);
+  line(lineX3, cHeight/25, lineX3, cHeight);
+  line(lineX4, cHeight/25, lineX4, cHeight);
+  line(0,lineY5 + 2.5,cWidth,lineY5 + 2.5);
   line(0,lineY6 + 2.5,cWidth,lineY6 + 2.5);
 
-  drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX1, lineX2, true);  // Left side
-  drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX3, lineX4, true);  // Right side
-  drawCrossBeams(40, 0, lineY5 + 2.5, cWidth, lineY5 + 2.5, lineY6 + 2.5, false); // Horizontal zigzag beams
-  //drawCrossBeamsVerticle(20,0 + cHeight/15,cHeight,lineX1,lineX2);
-  //drawCrossBeamsVerticle(20,0 + cHeight/15,cHeight,lineX3,lineX4);
+  drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX1, lineX2, true); //zigzags for left beams
+  drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX3, lineX4, true); //zigzags for right beams
+  drawCrossBeams(40, 0, lineY5 + 2.5, cWidth, lineY5 + 2.5, lineY6 + 2.5, false); //zigzags for top beams
 
-  drawLightBox(lightBoxCount,bass,lightBoxStates);
+  drawLightBox(lightBoxCount,bass,lightBoxStates); //lightboxes
 
-  image(crowd,0,cHeight/2.5,cWidth,cHeight);
+  image(crowd,0,cHeight/2.5,cWidth,cHeight); //crowd
+
+  updateGradientBrightness(bass); //update gradient based on bass
 
   /*
   quad(
