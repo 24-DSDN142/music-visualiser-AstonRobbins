@@ -158,10 +158,16 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   drawGradientBackground();
 
-  fill(0);
+  fill(6,21,71);
   rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
   rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight); //little screen left
   rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight); //little screen right
+
+  //show words on small screens
+  fill(20,180,240);
+  textAlign(CENTER, CENTER);
+  text(words, cWidth / 7, cHeight / 2); //display on left screen
+  text(words, cWidth - cWidth / 7, cHeight / 2); //display on right screen
 
   drawLasers();
 
@@ -193,7 +199,8 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   drawLightBox(lightBoxCount,lightBoxStates); //lightboxes
 
   tint(0);
-  image(crowd,0,cHeight/3,cWidth,cHeight); //crowd
+  image(crowdGraphics,0,0); //crowd
+  image(bandGraphics,0,0); //band
 
   updateGradient(bass); //update gradient based on bass
   updateLaserGlowIntensity(drum); // update lasers based on drum

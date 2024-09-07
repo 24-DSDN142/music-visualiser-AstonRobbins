@@ -44,6 +44,7 @@ function preload() {
   table = loadTable('volumes.csv', 'csv');
   words = loadStrings('words.txt');
   crowd = loadImage('crowd.png');
+  band = loadImage('band.png');
 }
 
 let volumes = [];
@@ -103,6 +104,18 @@ function setup() {
       volumes[i] = Taira.smoothen(volumes[i], Taira.ALGORITHMS.GAUSSIAN, 10, radius, true)
     }
   }
+
+  //load images here to help performance
+  pixelDensity(1);
+  crowd.resize(cWidth, cHeight);
+  band.resize(cWidth / 4, cHeight / 2);
+
+  crowdGraphics = createGraphics(cWidth, cHeight);
+  bandGraphics = createGraphics(cWidth, cHeight);
+
+  //images free from pngWING
+  crowdGraphics.image(crowd, 0, canvasHeight / 3);
+  bandGraphics.image(band, canvasWidth/2.6,canvasHeight/2);
 }
 
 function switchRunMode() {
