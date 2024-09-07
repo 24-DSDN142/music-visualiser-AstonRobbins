@@ -6,13 +6,43 @@ class Rotation{
 r = new Rotation;
 r.rotate = 0;
 
+cWidth = 960;
+cHeight = 540;
+smallScreenWidth = cWidth/6,
+smallScreenHeight = cHeight/8
+
+
+
 // vocal, drum, bass, and other are volumes ranging from 0 to 100
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
-  background(20)
+
+  background(100);
   textFont('Verdana'); // please use CSS safe fonts
   rectMode(CENTER)
   textSize(24);
 
+
+  //fill(0);
+  //rect(cWidth/2,cHeight/2,cWidth/2.5,cHeight/6);
+
+
+  image(crowd,0,cHeight/2.5,cWidth,cHeight);
+
+  quad(
+   cWidth/4, cHeight/2 - smallScreenHeight/2, //top left
+   cWidth/4 + smallScreenWidth, cHeight/2 - smallScreenHeight/2, //top right
+   cWidth/4 + smallScreenWidth, cHeight/2 + smallScreenHeight/2, //bottom right
+   cWidth/4, cHeight/2 + smallScreenHeight/2, //bottom left
+  );
+
+  quad(
+    cWidth/4 * 2.5, cHeight/2 - smallScreenHeight/2, //top left
+    cWidth/4 * 2.5+ smallScreenWidth, cHeight/2 - smallScreenHeight/2, //top right
+    cWidth/4 * 2.5+ smallScreenWidth, cHeight/2 + smallScreenHeight/2, //bottom right
+    cWidth/4 * 2.5, cHeight/2 + smallScreenHeight/2, //bottom left
+   );
+
+  /*
   vocalX = map(vocal, 0, 100, 0, 540);
   vocalY = map(vocal, 0, 100, 0, 960);
 
@@ -74,7 +104,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   bezier(controlPoints4[0].x,controlPoints4[0].y,controlPoints4[1].x,controlPoints4[1].y,
     controlPoints4[2].x,controlPoints4[2].y,controlPoints4[3].x,controlPoints4[3].y
   );
-  
+  */
 
 
   /*
