@@ -106,6 +106,9 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   drawGradientBackground();
 
+  fill(0);
+  rect(cWidth/2,cHeight - cHeight/16,cWidth,cHeight/8);
+
   fill(0,0,255);
   rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
   rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight); //little screen left
@@ -135,7 +138,8 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   drawLightBox(lightBoxCount,bass,lightBoxStates); //lightboxes
 
-  image(crowd,0,cHeight/2.5,cWidth,cHeight); //crowd
+  tint(0);
+  image(crowd,0,cHeight/3,cWidth,cHeight); //crowd
 
   updateGradientBrightness(bass); //update gradient based on bass
 
