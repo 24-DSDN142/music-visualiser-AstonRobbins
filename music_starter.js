@@ -14,6 +14,11 @@ smallScreenHeight = cHeight/5;
 bigScreenWidth = cWidth/2.5;
 bigScreenHeight = cHeight/3;
 
+lightBoxStates = [];
+lightBoxCount = 8;
+for (let i = 0; i < lightBoxCount; i++) {
+  lightBoxStates.push({ glowIntensity: 10, frameCountdown: 0 });
+}
 
 function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segment2, isVertical = true) {
   strokeWeight(2);
@@ -38,15 +43,31 @@ function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segmen
   }
 }
 
-function drawLightBox(numSpeakers){
+function drawLightBox(numSpeakers, bass, lightBoxStates){
 
-  speakerWidth = (cWidth/2)/numSpeakers; 
-  for(let i = 0; i < numSpeakers; i++){
+  speakerWidth = (cWidth / 2) / numSpeakers;
+
+  for (let i = 0; i < numSpeakers; i++) {
     fill(0);
-    rect(speakerWidth + speakerWidth * i * 2,cHeight/20,speakerWidth,cHeight/10);
-    fill(10);
-    circle((speakerWidth + speakerWidth * i * 2) - speakerWidth/4,cHeight/20,speakerWidth/3,cHeight/10);
-    circle((speakerWidth + speakerWidth * i * 2) + speakerWidth/4,cHeight/20,speakerWidth/3,cHeight/10);
+    rect(speakerWidth + speakerWidth * i * 2, cHeight / 20, speakerWidth, cHeight / 10);
+
+    if (bass > 70 && lightBoxStates[i].frameCountdown === 0 && lightBoxStates[i].glowIntensity === 10) {
+      lightBoxStates[i].glowIntensity = 255;
+      lightBoxStates[i].frameCountdown = 10;
+    }
+
+    if (lightBoxStates[i].frameCountdown > 0) {
+      lightBoxStates[i].frameCountdown--;
+    } else {
+      if (lightBoxStates[i].glowIntensity > 10) {
+        lightBoxStates[i].glowIntensity -= 5;
+      }
+    }
+
+    fill(64, 224, 208, lightBoxStates[i].glowIntensity);
+
+    circle((speakerWidth + speakerWidth * i * 2) - speakerWidth / 4, cHeight / 20, speakerWidth / 3, cHeight / 10);
+    circle((speakerWidth + speakerWidth * i * 2) + speakerWidth / 4, cHeight / 20, speakerWidth / 3, cHeight / 10);
   }
 }
 
@@ -93,7 +114,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   //drawCrossBeamsVerticle(20,0 + cHeight/15,cHeight,lineX1,lineX2);
   //drawCrossBeamsVerticle(20,0 + cHeight/15,cHeight,lineX3,lineX4);
 
-  drawLightBox(8);
+  drawLightBox(lightBoxCount,bass,lightBoxStates);
 
   image(crowd,0,cHeight/2.5,cWidth,cHeight);
 
