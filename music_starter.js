@@ -8,31 +8,101 @@ r.rotate = 0;
 
 cWidth = 960;
 cHeight = 540;
-smallScreenWidth = cWidth/6,
-smallScreenHeight = cHeight/8
+
+smallScreenWidth = cWidth/4;
+smallScreenHeight = cHeight/5;
+bigScreenWidth = cWidth/2.5;
+bigScreenHeight = cHeight/3;
 
 
+function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segment2, isVertical = true) {
+  strokeWeight(2);
+  let segmentSize = beamLength / numZigZags; //segment size of one zigzag
+
+  for (let i = 0; i < numZigZags; i++) {
+    if (isVertical) {
+      let y1 = startY + i * segmentSize;
+      let y2 = y1 + segmentSize;
+
+      //draw zigzag lines between the two vertical lines
+      line(segment1, y1, segment2, y2);
+      line(segment2, y2, segment1, y1 + segmentSize);
+    } else {
+      let x1 = startX + i * segmentSize;
+      let x2 = x1 + segmentSize;
+
+      //draw zigzag lines between the two horizontal lines
+      line(x1, segment1, x2, segment2);
+      line(x2, segment2, x1 + segmentSize, segment1);
+    }
+  }
+}
+
+function drawLightBox(numSpeakers){
+
+  speakerWidth = (cWidth/2)/numSpeakers; 
+  for(let i = 0; i < numSpeakers; i++){
+    fill(0);
+    rect(speakerWidth + speakerWidth * i * 2,cHeight/20,speakerWidth,cHeight/10);
+    fill(10);
+    circle((speakerWidth + speakerWidth * i * 2) - speakerWidth/4,cHeight/20,speakerWidth/3,cHeight/10);
+    circle((speakerWidth + speakerWidth * i * 2) + speakerWidth/4,cHeight/20,speakerWidth/3,cHeight/10);
+  }
+}
 
 // vocal, drum, bass, and other are volumes ranging from 0 to 100
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
-  background(100);
+  background(20);
   textFont('Verdana'); // please use CSS safe fonts
   rectMode(CENTER)
   textSize(24);
 
 
-  //fill(0);
-  //rect(cWidth/2,cHeight/2,cWidth/2.5,cHeight/6);
+  fill(0,0,255);
+  rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
+  rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight);
+  rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight);
 
+  stroke(0);
+  strokeWeight(5);
+
+  lineX1 = cWidth / 2 - bigScreenWidth / 2; // Position of the first vertical line
+  lineX2 = lineX1 - cWidth / 30; // Position of the second vertical line
+
+  // Draw the two vertical black lines
+  line(lineX1, cHeight/25, lineX1, cHeight);
+  line(lineX2, cHeight/25, lineX2, cHeight);
+
+  lineX3 = cWidth / 2 + bigScreenWidth / 2; // Position of the first vertical line
+  lineX4 = lineX3 + cWidth / 30; // Position of the second vertical line
+
+  // Draw the two vertical black lines
+  line(lineX3, cHeight/25, lineX3, cHeight);
+  line(lineX4, cHeight/25, lineX4, cHeight);
+
+  lineY5 = 0;
+  lineY6 = cHeight/30;
+
+  line(0,lineY5 + 2.5,cWidth,lineY5 + 2.5); //2.5 is for the stroke weight of 5
+  line(0,lineY6 + 2.5,cWidth,lineY6 + 2.5);
+
+  drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX1, lineX2, true);  // Left side
+  drawCrossBeams(20, 0, cHeight / 25, cHeight, lineX3, lineX4, true);  // Right side
+  drawCrossBeams(40, 0, lineY5 + 2.5, cWidth, lineY5 + 2.5, lineY6 + 2.5, false); // Horizontal zigzag beams
+  //drawCrossBeamsVerticle(20,0 + cHeight/15,cHeight,lineX1,lineX2);
+  //drawCrossBeamsVerticle(20,0 + cHeight/15,cHeight,lineX3,lineX4);
+
+  drawLightBox(8);
 
   image(crowd,0,cHeight/2.5,cWidth,cHeight);
 
+  /*
   quad(
-   cWidth/4, cHeight/2 - smallScreenHeight/2, //top left
-   cWidth/4 + smallScreenWidth, cHeight/2 - smallScreenHeight/2, //top right
-   cWidth/4 + smallScreenWidth, cHeight/2 + smallScreenHeight/2, //bottom right
-   cWidth/4, cHeight/2 + smallScreenHeight/2, //bottom left
+   cWidth/8, cHeight/2 - smallScreenHeight/2, //top left
+   cWidth/8 + smallScreenWidth, cHeight/2 - smallScreenHeight/2, //top right
+   cWidth/8 + smallScreenWidth, cHeight/2 + smallScreenHeight/2, //bottom right
+   cWidth/8, cHeight/2 + smallScreenHeight/2, //bottom left
   );
 
   quad(
@@ -41,6 +111,8 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
     cWidth/4 * 2.5+ smallScreenWidth, cHeight/2 + smallScreenHeight/2, //bottom right
     cWidth/4 * 2.5, cHeight/2 + smallScreenHeight/2, //bottom left
    );
+
+   */
 
   /*
   vocalX = map(vocal, 0, 100, 0, 540);
