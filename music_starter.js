@@ -46,7 +46,8 @@ function updateGradient(lightNum) {
   }
 
   if (gradientGlowIntensity > 0) {
-    gradientGlowIntensity -= 5;
+    gradientGlowIntensity -= 6.05;
+    if (gradientGlowIntensity < 0){gradientGlowIntensity = 0;}
   }
 }
 
@@ -102,7 +103,8 @@ function updateLaserGlowIntensity(lightNum) {
   
   //fade lazers out
   if (laserGlowIntensity > 0) {
-    laserGlowIntensity -= 5;
+    laserGlowIntensity -= 6.05;
+    if(laserGlowIntensity < 0){laserGlowIntensity = 0;}
   }
 }
 
