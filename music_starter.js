@@ -46,7 +46,7 @@ function updateGradient(lightNum) {
   }
 
   if (gradientGlowIntensity > 0) {
-    gradientGlowIntensity -= 6.05;
+    gradientGlowIntensity -= 6.30;
     if (gradientGlowIntensity < 0){gradientGlowIntensity = 0;}
   }
 }
