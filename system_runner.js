@@ -116,6 +116,10 @@ function setup() {
   //images free from pngWING
   crowdGraphics.image(crowd, 0, canvasHeight / 3);
   bandGraphics.image(band, canvasWidth/2.6,canvasHeight/2);
+
+  //PGraphics object for performance
+  screenBuffer = createGraphics(smallScreenWidth, smallScreenHeight);
+  drawSmallScreenCircles(0, 0, smallScreenWidth, smallScreenHeight, 25, 50, screenBuffer);
 }
 
 function switchRunMode() {

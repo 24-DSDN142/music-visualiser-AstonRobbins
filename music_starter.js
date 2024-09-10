@@ -16,7 +16,7 @@ bigScreenHeight = cHeight/3;
 
 lightBoxStates = [];
 lightBoxCount = 8;
-for (let i = 0; i < lightBoxCount; i++) {
+for (i = 0; i < lightBoxCount; i++) {
   lightBoxStates.push({ glowIntensity: 10, frameCountdown: 0 });
 }
 
@@ -51,21 +51,128 @@ function updateGradient(lightNum) {
   }
 }
 
+//screenX and Y might not be needed? CHECK LATER (processing speed check should help)
+function drawSmallScreenCircles(screenX, screenY, screenWidth, screenHeight, rows, cols, pg) {
+  circleDiameter = screenWidth / cols;
+  xOffset = circleDiameter / 2;
+  yOffset = screenHeight / rows;
+
+  pg.noStroke();
+  pg.fill(0);
+
+  //no adjustment (CHECK LATER DONT FORGET)
+  for (row = 0; row < rows; row++) {
+    for (col = 0; col < cols; col++) {
+      xPos = col * circleDiameter + xOffset;
+      yPos = row * yOffset + yOffset / 2;
+      pg.ellipse(xPos, yPos, circleDiameter * 0.8);
+    }
+  }
+}
+
+screenBuffer; //PGraphics screen buffer for off bulbs. Helps with processing speed
+
+function getMappedColor(voice) {
+  //map for smooth transition from blue to purple
+  r = map(voice, 0, 100, 64, 148);
+  g = map(voice, 0, 100, 224, 0);
+  b = map(voice, 0, 100, 208, 211);
+
+  return color(r, g, b);
+}
+
+circles = [];
+bulbDiameter;
+circleCenterX, circleCenterY;
+thickness = 3;
+
+//circle creation
+function createNewCircle() {
+  return {
+    currentRadius: 0,
+    frameCounter: 0,
+  };
+}
+
+disableTurnOff = false; //when bass > 70
+effectStarted = false; //to track if effect has started of final circle turning off
+finalCircleComplete = false; //when animation is complete
+
+function turnOnBulbsInCirclePattern(rows, cols, voice, screenX, bass) {
+  mappedColor = getMappedColor(voice);
+  fill(mappedColor);
+
+  bulbDiameter = smallScreenWidth / cols;
+  circleCenterX = screenX;
+  circleCenterY = cHeight / 2;
+
+  //check if bass has hit above 70 to stop creating new circles
+  if (bass > 70 && !effectStarted) {
+    disableTurnOff = true;
+    effectStarted = true;
+  }
+
+  //for all active circles
+  for (i = 0; i < circles.length; i++) {
+    circle = circles[i];
+
+    for (row = 0; row < rows; row++) {
+      for (col = 0; col < cols; col++) {
+        xPos = circleCenterX - smallScreenWidth / 2 + col * bulbDiameter + bulbDiameter / 2;
+        yPos = circleCenterY - smallScreenHeight / 2 + row * (smallScreenHeight / rows) + (smallScreenHeight / rows) / 2;
+
+        //calculate distance from the center to current bulb
+        distance = dist(xPos, yPos, circleCenterX, circleCenterY);
+
+        //draw the circles for each expanding ring
+        if (distance <= circle.currentRadius * bulbDiameter &&
+            distance > (circle.currentRadius - thickness) * bulbDiameter) {
+          if (yPos >= cHeight / 2 - smallScreenHeight / 2 && yPos <= cHeight / 2 + smallScreenHeight / 2) {
+            ellipse(xPos, yPos, bulbDiameter * 0.8); //draw the mapped color of vocal
+          }
+        }
+      }
+    }
+
+    //every 5 frames, increase the radius of each circle
+    circle.frameCounter++;
+    if (circle.frameCounter >= 5) {
+      circle.currentRadius++;
+      circle.frameCounter = 0; //reset frame counter
+    }
+  }
+
+  //stop creating new circles once bass > 70
+  if (!disableTurnOff) {
+    circles = circles.filter(circle => circle.currentRadius * bulbDiameter <= smallScreenWidth + thickness * bulbDiameter);
+
+    //create a new circle every time the last circle reaches a radius of 10 bulbs
+    if (circles.length === 0 || circles[circles.length - 1].currentRadius >= 10) {
+      circles.push(createNewCircle());
+    }
+  }
+
+  //once the final circle reaches the total number of columns mark animation as complete
+  if (circles.length > 0 && circles[circles.length - 1].currentRadius >= cols) {
+    finalCircleComplete = true;
+  }
+}
+
 function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segment2, isVertical = true) {
   strokeWeight(2);
   let segmentSize = beamLength / numZigZags; //segment size of one zigzag
 
-  for (let i = 0; i < numZigZags; i++) {
+  for (i = 0; i < numZigZags; i++) {
     if (isVertical) {
-      let y1 = startY + i * segmentSize;
-      let y2 = y1 + segmentSize;
+      y1 = startY + i * segmentSize;
+      y2 = y1 + segmentSize;
 
       //draw zigzag lines between the two vertical lines
       line(segment1, y1, segment2, y2);
       line(segment2, y2, segment1, y1 + segmentSize);
     } else {
-      let x1 = startX + i * segmentSize;
-      let x2 = x1 + segmentSize;
+      x1 = startX + i * segmentSize;
+      x2 = x1 + segmentSize;
 
       //draw zigzag lines between the two horizontal lines
       line(x1, segment1, x2, segment2);
@@ -77,7 +184,7 @@ function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segmen
 function drawLightBox(numSpeakers, lightBoxStates){
   speakerWidth = (cWidth / 2) / numSpeakers;
 
-  for (let i = 0; i < numSpeakers; i++) {
+  for (i = 0; i < numSpeakers; i++) {
     fill(0);
     rect(speakerWidth + speakerWidth * i * 2, cHeight / 20, speakerWidth, cHeight / 10);
 
@@ -162,14 +269,34 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   fill(6,21,71);
   rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
+  fill(20);
   rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight); //little screen left
   rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight); //little screen right
 
+  rectMode(CORNER);
+
+  //draw the buffered image of the small screens with circles
+  image(screenBuffer, cWidth / 7 - smallScreenWidth / 2, cHeight / 2 - smallScreenHeight / 2); //left screen
+  image(screenBuffer, cWidth - cWidth / 7 - smallScreenWidth / 2, cHeight / 2 - smallScreenHeight / 2); //right screen
+
+  //remove vocal noise
+  if(vocal < 50){
+    vocal = 0;
+  }
+  else {
+    vocal = map(vocal, 50, 100, 0, 100); //remap vocal volume to 50,100 for smoother colour transition
+  }
+
+  turnOnBulbsInCirclePattern(25, 50, vocal, cWidth / 7, bass); //left screen
+  turnOnBulbsInCirclePattern(25, 50, vocal, cWidth - cWidth / 7, bass); //right screen
+
+  rectMode(CENTER)
   //show words on small screens
   fill(20,180,240);
   textAlign(CENTER, CENTER);
-  text(words, cWidth / 7, cHeight / 2); //display on left screen
-  text(words, cWidth - cWidth / 7, cHeight / 2); //display on right screen
+  //text can't be shown due to song change not containing words
+  //text(words, cWidth / 7, cHeight / 2); //display on left screen
+  //text(words, cWidth - cWidth / 7, cHeight / 2); //display on right screen
 
   drawLasers();
 
