@@ -45,6 +45,10 @@ function preload() {
   words = loadStrings('words.txt');
   crowd = loadImage('crowd.png');
   band = loadImage('band.png');
+  bassImage = loadImage('bass.png');
+  voiceImage = loadImage('voice.png');
+  drumImage = loadImage('drum.png');
+  otherImage = loadImage('other.png');
 }
 
 let volumes = [];
@@ -107,15 +111,28 @@ function setup() {
 
   //load images here to help performance
   pixelDensity(1);
-  crowd.resize(cWidth, cHeight);
+  crowd.resize(cWidth + cWidth/8, cHeight);
   band.resize(cWidth / 4, cHeight / 2);
+  bassImage.resize(cWidth/2, cHeight/2);
+  voiceImage.resize(cWidth/2, cHeight/2);
+  drumImage.resize(cWidth/2, cHeight/2);
+  otherImage.resize(cWidth/2, cHeight/2);
 
-  crowdGraphics = createGraphics(cWidth, cHeight);
+  crowdGraphics = createGraphics(cWidth + cWidth / 8, cHeight);
   bandGraphics = createGraphics(cWidth, cHeight);
+  bassGraphics = createGraphics(cWidth, cHeight);
+  voiceGraphics = createGraphics(cWidth, cHeight);
+  drumGraphics = createGraphics(cWidth, cHeight);
+  otherGraphics = createGraphics(cWidth, cHeight);
+  
 
   //images free from pngWING
   crowdGraphics.image(crowd, 0, canvasHeight / 3);
   bandGraphics.image(band, canvasWidth/2.6,canvasHeight/2);
+  bassGraphics.image(bassImage, canvasWidth/2.6,canvasHeight/2);
+  voiceGraphics.image(voiceImage, canvasWidth/2.6,canvasHeight/2);
+  drumGraphics.image(drumImage, canvasWidth/2.6,canvasHeight/2);
+  otherGraphics.image(otherImage, canvasWidth/2.6,canvasHeight/2);
 
   //PGraphics object for performance
   screenBuffer = createGraphics(smallScreenWidth, smallScreenHeight);

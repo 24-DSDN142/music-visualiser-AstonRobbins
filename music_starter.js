@@ -1,4 +1,3 @@
-
 class Rotation{
   rotate;
 }
@@ -16,7 +15,7 @@ bigScreenHeight = cHeight/3;
 
 lightBoxStates = [];
 lightBoxCount = 8;
-for (i = 0; i < lightBoxCount; i++) {
+for (let i = 0; i < lightBoxCount; i++) {
   lightBoxStates.push({ glowIntensity: 10, frameCountdown: 0 });
 }
 
@@ -35,7 +34,7 @@ function drawGradientBackground() {
 }
 
 //get background colour
-function getBackgroundColorAtY(yPosition) {
+function getBackgroundColorAtY(yPosition, counter) {
   let inter = map(yPosition, cHeight / 8, cHeight - cHeight / 40, 0, 1);
   return lerpColor(color(64, 224, 208, gradientGlowIntensity), color(0, 0, 0, gradientGlowIntensity), inter);
 }
@@ -46,45 +45,44 @@ function updateGradient(lightNum) {
   }
 
   if (gradientGlowIntensity > 0) {
-    gradientGlowIntensity -= 6.30;
+    gradientGlowIntensity -= 12.60;
     if (gradientGlowIntensity < 0){gradientGlowIntensity = 0;}
   }
 }
 
-//screenX and Y might not be needed? CHECK LATER (processing speed check should help)
 function drawSmallScreenCircles(screenX, screenY, screenWidth, screenHeight, rows, cols, pg) {
-  circleDiameter = screenWidth / cols;
-  xOffset = circleDiameter / 2;
-  yOffset = screenHeight / rows;
+  let circleDiameter = screenWidth / cols;
+  let xOffset = circleDiameter / 2;
+  let yOffset = screenHeight / rows;
 
   pg.noStroke();
   pg.fill(0);
 
-  //no adjustment (CHECK LATER DONT FORGET)
-  for (row = 0; row < rows; row++) {
-    for (col = 0; col < cols; col++) {
-      xPos = col * circleDiameter + xOffset;
-      yPos = row * yOffset + yOffset / 2;
+  //no additional adjustment (CHECK LATER PLEASE)
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      let xPos = col * circleDiameter + xOffset;
+      let yPos = row * yOffset + yOffset / 2;
       pg.ellipse(xPos, yPos, circleDiameter * 0.8);
     }
   }
 }
 
-screenBuffer; //PGraphics screen buffer for off bulbs. Helps with processing speed
+let screenBuffer; //PGraphics for processing speed
 
 function getMappedColor(voice) {
-  //map for smooth transition from blue to purple
-  r = map(voice, 0, 100, 64, 148);
-  g = map(voice, 0, 100, 224, 0);
-  b = map(voice, 0, 100, 208, 211);
+  //map rgb based on voice for smooth transition from blue to purple
+  let r = map(voice, 0, 100, 64, 148);
+  let g = map(voice, 0, 100, 224, 0); 
+  let b = map(voice, 0, 100, 208, 211);
 
   return color(r, g, b);
 }
 
-circles = [];
-bulbDiameter;
-circleCenterX, circleCenterY;
-thickness = 3;
+let circles = [];
+let bulbDiameter;
+let circleCenterX, circleCenterY;
+let thickness = 3;
 
 //circle creation
 function createNewCircle() {
@@ -98,63 +96,175 @@ disableTurnOff = false; //when bass > 70
 effectStarted = false; //to track if effect has started of final circle turning off
 finalCircleComplete = false; //when animation is complete
 
+let linesComplete = false;
+
 function turnOnBulbsInCirclePattern(rows, cols, voice, screenX, bass) {
-  mappedColor = getMappedColor(voice);
+  mappedColor = getMappedColor(voice); //color of circle should be from mapped voice
   fill(mappedColor);
 
   bulbDiameter = smallScreenWidth / cols;
   circleCenterX = screenX;
   circleCenterY = cHeight / 2;
 
-  //check if bass has hit above 70 to stop creating new circles
-  if (bass > 70 && !effectStarted) {
+  //if lines have happened circles should be indefinite
+  if (linesComplete) {
+    disableTurnOff = true;
+  } else if (bass > 70 && !effectStarted) {
     disableTurnOff = true;
     effectStarted = true;
   }
 
-  //for all active circles
+  //for all circles
   for (i = 0; i < circles.length; i++) {
-    circle = circles[i];
+    let circle = circles[i];
 
-    for (row = 0; row < rows; row++) {
-      for (col = 0; col < cols; col++) {
-        xPos = circleCenterX - smallScreenWidth / 2 + col * bulbDiameter + bulbDiameter / 2;
-        yPos = circleCenterY - smallScreenHeight / 2 + row * (smallScreenHeight / rows) + (smallScreenHeight / rows) / 2;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        let xPos = circleCenterX - smallScreenWidth / 2 + col * bulbDiameter + bulbDiameter / 2;
+        let yPos = circleCenterY - smallScreenHeight / 2 + row * (smallScreenHeight / rows) + (smallScreenHeight / rows) / 2;
 
-        //calculate distance from the center to current bulb
-        distance = dist(xPos, yPos, circleCenterX, circleCenterY);
+        let distance = dist(xPos, yPos, circleCenterX, circleCenterY);
 
-        //draw the circles for each expanding ring
+        //draw each circle
         if (distance <= circle.currentRadius * bulbDiameter &&
             distance > (circle.currentRadius - thickness) * bulbDiameter) {
           if (yPos >= cHeight / 2 - smallScreenHeight / 2 && yPos <= cHeight / 2 + smallScreenHeight / 2) {
-            ellipse(xPos, yPos, bulbDiameter * 0.8); //draw the mapped color of vocal
+            ellipse(xPos, yPos, bulbDiameter * 0.8); // Draw the mapped color of vocal
           }
         }
       }
     }
 
-    //every 5 frames, increase the radius of each circle
+    //increase radius of circle every 5 frames
     circle.frameCounter++;
     if (circle.frameCounter >= 5) {
       circle.currentRadius++;
-      circle.frameCounter = 0; //reset frame counter
+      circle.frameCounter = 0;
     }
   }
 
-  //stop creating new circles once bass > 70
-  if (!disableTurnOff) {
+  if (!disableTurnOff || linesComplete) {
     circles = circles.filter(circle => circle.currentRadius * bulbDiameter <= smallScreenWidth + thickness * bulbDiameter);
 
-    //create a new circle every time the last circle reaches a radius of 10 bulbs
+    //new circle once distance of radius from center is > 10
     if (circles.length === 0 || circles[circles.length - 1].currentRadius >= 10) {
       circles.push(createNewCircle());
     }
   }
 
-  //once the final circle reaches the total number of columns mark animation as complete
+  //animation completes once final circle is off screen
   if (circles.length > 0 && circles[circles.length - 1].currentRadius >= cols) {
     finalCircleComplete = true;
+  }
+}
+
+let diagonalLinesLeft = [];
+let diagonalLinesRight = [];
+let lineWidth = 3;
+let lineStep = smallScreenWidth / 50;
+let vocalsBelowThresholdFrames = 0; //check for how many frames vocals are off
+let disableNewLines = false;
+
+function createNewDiagonalLine(startX) {
+  return {
+    startX: startX,
+    frameCounter: 0,
+  };
+}
+
+function drawDiagonalLine(rows, cols, voice, screenX, screenSide) {
+  let mappedColor = getMappedColor(voice); //color of line should be from mapped voice
+  fill(mappedColor);
+
+  bulbDiameter = smallScreenWidth / cols;
+  let lineCenterY = cHeight / 2;
+
+  //use the right array based on screen side
+  let diagonalLines = screenSide === 'left' ? diagonalLinesLeft : diagonalLinesRight;
+
+  for (let i = 0; i < diagonalLines.length; i++) {
+    let line = diagonalLines[i];
+
+    for (let row = 0; row < rows; row++) {
+      for (let j = 0; j < lineWidth; j++) {
+        let xPos;
+        if (screenSide === 'left') {
+          xPos = line.startX + j * lineStep - row * lineStep; //shift right for left side
+        } else {
+          xPos = line.startX - j * lineStep + row * lineStep; //shift left for right side
+        }
+
+        let yPos = lineCenterY - smallScreenHeight / 2 + row * (smallScreenHeight / rows) + (smallScreenHeight / rows) / 2;
+
+        if (xPos >= screenX - smallScreenWidth / 2 && xPos <= screenX + smallScreenWidth / 2) {
+          ellipse(xPos, yPos, bulbDiameter * 0.8);
+        }
+      }
+    }
+
+    //move line every 5 frames
+    line.frameCounter++;
+    if (line.frameCounter >= 5) {
+      if (screenSide === 'left') {
+        line.startX += lineStep;
+      } else {
+        line.startX -= lineStep;
+      line.frameCounter = 0;
+    }
+  }
+
+  //lines remove once off screen
+  diagonalLines = diagonalLines.filter(line => {
+    if (screenSide === 'left') {
+      return line.startX <= screenX + smallScreenWidth;
+    } else {
+      return line.startX >= screenX - smallScreenWidth;
+    }
+  });
+
+  //create new lines
+  if (!disableNewLines) {
+    let lastLineStartX = diagonalLines.length > 0 ? diagonalLines[diagonalLines.length - 1].startX : screenX;
+    if (screenSide === 'left' && lastLineStartX >= 10 * lineStep) {
+      diagonalLines.push(createNewDiagonalLine(screenX - smallScreenWidth / 2)); // Add new diagonal line for the left screen
+    }
+    if (screenSide === 'right' && lastLineStartX <= screenX + smallScreenWidth / 2 - 6 * lineStep) {
+      diagonalLines.push(createNewDiagonalLine(screenX + smallScreenWidth / 2)); // Add new diagonal line for the right screen
+    }
+  }
+
+  //save lines to correct array
+  if (screenSide === 'left') {
+    diagonalLinesLeft = diagonalLines;
+  } else {
+    diagonalLinesRight = diagonalLines;
+  }
+}
+
+function handleVocalThreshold(vocal) {
+  //count frames when vocal < 50
+  if (vocal < 50) {
+    vocalsBelowThresholdFrames++;
+  } else {
+    vocalsBelowThresholdFrames = 0;
+  }
+
+  if (vocalsBelowThresholdFrames >= 150) {
+    disableNewLines = true;
+  }
+}
+
+function startDiagonalLineAnimation(rows, cols, vocal, bass) {
+  if (finalCircleComplete) {
+    handleVocalThreshold(vocal);
+
+    drawDiagonalLine(rows, cols, vocal, cWidth / 7, 'left');
+    drawDiagonalLine(rows, cols, vocal, cWidth - cWidth / 7, 'right');
+
+    //check for empty arrays to see if lines are fully complete
+    if (diagonalLinesLeft.length === 0 && diagonalLinesRight.length === 0) {
+      linesComplete = true; //flag for circles to play again
+    }
   }
 }
 
@@ -162,17 +272,17 @@ function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segmen
   strokeWeight(2);
   let segmentSize = beamLength / numZigZags; //segment size of one zigzag
 
-  for (i = 0; i < numZigZags; i++) {
+  for (let i = 0; i < numZigZags; i++) {
     if (isVertical) {
-      y1 = startY + i * segmentSize;
-      y2 = y1 + segmentSize;
+      let y1 = startY + i * segmentSize;
+      let y2 = y1 + segmentSize;
 
       //draw zigzag lines between the two vertical lines
       line(segment1, y1, segment2, y2);
       line(segment2, y2, segment1, y1 + segmentSize);
     } else {
-      x1 = startX + i * segmentSize;
-      x2 = x1 + segmentSize;
+      let x1 = startX + i * segmentSize;
+      let x2 = x1 + segmentSize;
 
       //draw zigzag lines between the two horizontal lines
       line(x1, segment1, x2, segment2);
@@ -184,7 +294,7 @@ function drawCrossBeams(numZigZags, startX, startY, beamLength, segment1, segmen
 function drawLightBox(numSpeakers, lightBoxStates){
   speakerWidth = (cWidth / 2) / numSpeakers;
 
-  for (i = 0; i < numSpeakers; i++) {
+  for (let i = 0; i < numSpeakers; i++) {
     fill(0);
     rect(speakerWidth + speakerWidth * i * 2, cHeight / 20, speakerWidth, cHeight / 10);
 
@@ -257,7 +367,83 @@ function drawLasers() {
   laserRotationAngle += 0.5;
 }
 
-// vocal, drum, bass, and other are volumes ranging from 0 to 100
+let swayAngle = 20;
+let swaySpeed = 5;
+let swayAmplitude = 20;
+
+function drawSwayingCrowdAndRect(other) {
+
+  let swayOffsetX = sin(swayAngle) * swayAmplitude;
+
+
+  let verticalAmplitude = map(other, 0, 100, 0, 20); //other is mapped for the verticle height of crowd
+  let swayOffsetY = -verticalAmplitude;
+
+  push();
+  translate(swayOffsetX, swayOffsetY);
+  image(crowdGraphics, -20, 0);
+  pop();
+
+  //this is a black rectangle under the crowd so there is no gap
+  fill(0);
+  push();
+  translate(swayOffsetX, swayOffsetY);
+  rect(cWidth / 2, cHeight - cHeight / 16, cWidth, cHeight / 8);
+  pop();
+
+  swayAngle += swaySpeed;
+}
+
+let currentGraphics = null;
+let frameCounter = 0;
+
+function updateAndDisplayLoudestImage(bass, voice, drum, other) {
+  
+  //change who is on screen every 150 frames
+  if (frameCounter >= 150 || currentGraphics === null) {
+    frameCounter = 0;
+
+    //whoever is loudest should be displayed
+    if (bass >= voice && bass >= drum && bass >= other) {
+      currentGraphics = bassGraphics;
+    } else if (voice >= bass && voice >= drum && voice >= other) {
+      currentGraphics = voiceGraphics;
+    } else if (drum >= bass && drum >= voice && drum >= other) {
+      currentGraphics = drumGraphics;
+    } else if (other >= bass && other >= voice && other >= drum) {
+      currentGraphics = otherGraphics;
+    }
+  }
+
+  if (currentGraphics) {
+    image(currentGraphics, -130, -140);
+  }
+
+  frameCounter++;
+}
+
+let gradientShift = 0;
+let frameCountColour = 0;
+
+function drawOscillatingGradient() {
+  frameCountColour++;
+  push();
+  let purple = color(148, 0, 211);
+  let turquoise = color(64, 224, 209);
+
+  //gradient shift based on frames
+  gradientShift = (sin(frameCountColour * 2) + 1) / 2; //goes between 0 and 1
+
+  for (let y = 0; y < bigScreenHeight; y++) {
+    let inter = map(y, 0, bigScreenHeight, 0, 1);  //map between 0 and 1
+    let colorAtY = lerpColor(turquoise, purple, abs(inter - gradientShift));
+    stroke(colorAtY);
+    line(cWidth / 2 - bigScreenWidth / 2, cHeight / 2 - bigScreenHeight / 2 + y, 
+         cWidth / 2 + bigScreenWidth / 2, cHeight / 2 - bigScreenHeight / 2 + y);
+  }
+  pop();
+}
+
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   background(5);
@@ -267,11 +453,14 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   drawGradientBackground();
 
-  fill(6,21,71);
-  rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
+  //fill(6,21,71);
+  //rect(cWidth/2,cHeight/2,bigScreenWidth,bigScreenHeight); //big screen
+  drawOscillatingGradient();
   fill(20);
   rect(cWidth/7,cHeight/2,smallScreenWidth,smallScreenHeight); //little screen left
   rect(cWidth - cWidth/7, cHeight/2,smallScreenWidth,smallScreenHeight); //little screen right
+
+  updateAndDisplayLoudestImage(bass, vocal, drum, other);
 
   rectMode(CORNER);
 
@@ -289,6 +478,8 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
   turnOnBulbsInCirclePattern(25, 50, vocal, cWidth / 7, bass); //left screen
   turnOnBulbsInCirclePattern(25, 50, vocal, cWidth - cWidth / 7, bass); //right screen
+
+  startDiagonalLineAnimation(25, 50, vocal, bass);
 
   rectMode(CENTER)
   //show words on small screens
@@ -328,7 +519,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
   drawLightBox(lightBoxCount,lightBoxStates); //lightboxes
 
   tint(0);
-  image(crowdGraphics,0,0); //crowd
+  drawSwayingCrowdAndRect(other);
   image(bandGraphics,0,0); //band
 
   updateGradient(bass); //update gradient based on bass
