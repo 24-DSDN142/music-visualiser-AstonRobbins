@@ -209,8 +209,9 @@ function drawDiagonalLine(rows, cols, voice, screenX, screenSide) {
         line.startX += lineStep;
       } else {
         line.startX -= lineStep;
-      line.frameCounter = 0;
-    }
+      }
+      line.frameCounter = 0; // <-- Missing brace fix
+    } // <-- This closes the inner if correctly
   }
 
   //lines remove once off screen
