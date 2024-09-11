@@ -369,7 +369,7 @@ function drawLasers() {
 }
 
 let swayAngle = 20;
-let swaySpeed = 5;
+let swaySpeed;
 let swayAmplitude = 20;
 
 function drawSwayingCrowdAndRect(other) {
@@ -377,8 +377,10 @@ function drawSwayingCrowdAndRect(other) {
   let swayOffsetX = sin(swayAngle) * swayAmplitude;
 
 
-  let verticalAmplitude = map(other, 0, 100, 0, 20); //other is mapped for the verticle height of crowd
+  let verticalAmplitude = map(other, 0, 100, 0, 30); //other is mapped for the verticle height of crowd
+  let horizontalMovement = map(other, 0, 100, 0, 10);
   let swayOffsetY = -verticalAmplitude;
+  swaySpeed = horizontalMovement;
 
   push();
   translate(swayOffsetX, swayOffsetY);
@@ -389,7 +391,7 @@ function drawSwayingCrowdAndRect(other) {
   fill(0);
   push();
   translate(swayOffsetX, swayOffsetY);
-  rect(cWidth / 2, cHeight - cHeight / 16, cWidth, cHeight / 8);
+  rect(cWidth / 1.5, cHeight - cHeight / 16, cWidth + cWidth / 2, cHeight / 8);
   pop();
 
   swayAngle += swaySpeed;
