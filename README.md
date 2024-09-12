@@ -4,6 +4,18 @@
 
 A P5JS framework for running a simple music visualizer, intended as a creative coding I assignment.
 
-Song details: // UPDATE THIS AS YOUR CHANGE YOUR SONG 
-Title = Just Dropped In (To See What Condition My Condition Was In)
-Artist = Kenny Rogers
+Song details:
+Title = Roll My Stone
+Artist = Arcy Drive
+
+Png details:
+Crowd:
+Type = Free PNG (non commercial) 
+Link = https://www.pngwing.com/en/free-png-kbucl
+Owner = www.psdgraphics.com
+
+Band: 
+Type = Free PNG (non commercial)
+Link = https://www.pngwing.com/en/free-png-zlksk
+Owner = www.psdgraphics.com
+
